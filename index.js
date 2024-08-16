@@ -27,6 +27,7 @@ async function run() {
 
     const productCollection = client.db("SumonMoto").collection("products");
     const usersCollection = client.db("SumonMoto").collection("users");
+    const reviewCollection = client.db("SumonMoto").collection("reviews");
 
     app.get("/products", async (req, res) => {
       const cursor = productCollection.find();
@@ -41,12 +42,18 @@ async function run() {
       res.send(result);
     });
 
+    app.post("/reviews", async (req, res) => {
+      const newReview = req.body;
+      console.log("inserted new review", newReview);
+      const result = await reviewCollection.insertOne(newReview);
+      res.send(result);
+    });
+
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
   } finally {
-    // Ensures that the client will close when you finish/error
     //     await client.close();
   }
 }
