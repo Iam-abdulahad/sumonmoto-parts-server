@@ -56,7 +56,28 @@ async function run() {
       }
     });
 
+    // Get single user by UID
+
+    app.get("/user/:uid", async (req, res) => {
+      const { uid } = req.params; // Extract uid correctly
+      console.log("Fetching user by UID:", uid);
+
+      try {
+        const user = await usersCollection.findOne({ uid });
+        if (!user) {
+          return res.status(404).json({ message: "User not found" });
+        }
+
+        // Return the complete user object based on the format
+        res.status(200).json(user);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        res.status(500).json({ message: "Server error", error });
+      }
+    });
+
     // Add or update a user
+
     app.post("/users", async (req, res) => {
       const newUser = req.body;
       console.log("Adding/updating user:", newUser);
@@ -112,12 +133,10 @@ async function run() {
       console.log("Inserted new review:", newReview);
       try {
         const result = await reviewCollection.insertOne(newReview);
-        res
-          .status(201)
-          .json({
-            message: "Review added successfully.",
-            review: result.ops[0],
-          });
+        res.status(201).json({
+          message: "Review added successfully.",
+          review: { ...newReview, _id: result.insertedId }, // No need for ops
+        });
       } catch (error) {
         console.error("Error adding review:", error);
         res.status(500).json({ message: "Error adding review" });
